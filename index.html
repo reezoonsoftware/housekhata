@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Construction Khata - Professional Management System</title>
+    <style>
+        :root {
+            /* High Contrast Colors for better visibility */
+            --primary: #1e40af; 
+            --primary-light: #dbeafe;
+            --primary-dark: #1e3a8a;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #334155; 
+            --success: #15803d; 
+            --success-light: #dcfce7;
+            --danger: #b91c1c; 
+            --danger-light: #fee2e2;
+            --warning: #92400e; 
+            --warning-light: #fef3c7;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.2), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.25), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', -apple-system, system-ui, sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text-main); 
+            line-height: 1.6; 
+            padding: 15px;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .container { max-width: 1100px; margin: 0 auto; }
+        header { text-align: left; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+        header h1 { font-size: 24px; font-weight: 800; color: var(--text-main); }
+
+        /* Navigation Tabs */
+        .tabs { display: flex; background: #cbd5e1; padding: 4px; border-radius: 12px; margin-bottom: 20px; gap: 4px; overflow-x: auto; }
+        .tab-btn { flex: 1; padding: 12px; border: none; background: none; cursor: pointer; font-weight: 800; font-size: 13px; color: #334155; border-radius: 8px; white-space: nowrap; transition: 0.2s; }
+        .tab-btn.active { background: var(--primary); color: white; box-shadow: var(--shadow); }
+
+        /* Sub-Tabs */
+        .sub-tabs { display: flex; gap: 8px; margin-bottom: 15px; }
+        .sub-tab-btn { padding: 6px 14px; border-radius: 20px; border: 2px solid #cbd5e1; background: white; cursor: pointer; font-weight: 700; font-size: 12px; }
+        .sub-tab-btn.active { background: var(--primary-dark); color: white; border-color: var(--primary-dark); }
+
+        .main-layout { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media (min-width: 768px) { .main-layout { grid-template-columns: 1fr 2fr; } }
+        .full-width { grid-template-columns: 1fr !important; }
+
+        .card { background: var(--card); border-radius: 16px; padding: 20px; box-shadow: var(--shadow); border: 1px solid #cbd5e1; margin-bottom: 20px; }
+        .form-title { font-size: 18px; font-weight: 800; color: var(--primary); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-size: 11px; font-weight: 800; color: var(--text-main); margin-bottom: 6px; text-transform: uppercase; }
+        input, select, textarea { width: 100%; padding: 10px 14px; border: 2px solid #94a3b8; border-radius: 10px; font-size: 14px; font-weight: 600; outline: none; background: white; }
+        input:focus, textarea:focus { border-color: var(--primary); }
+
+        .btn { padding: 12px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 6px; text-transform: uppercase; width: 100%; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-outline { background: white; border: 2px solid #94a3b8; color: var(--text-main); padding: 5px 12px; font-size: 11px; width: auto; border-radius: 8px; font-weight: 800; }
+        .btn-pay-net { background: #059669; color: white; padding: 10px 20px; font-size: 13px; margin-top: 10px; border: 2px solid white; width: auto; }
+
+        /* Calendar */
+        .calendar-card { padding: 15px; border-top: 5px solid var(--primary); }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        .day-label { font-size: 10px; font-weight: 900; text-align: center; color: var(--text-main); padding-bottom: 5px; }
+        .calendar-date { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; border-radius: 8px; cursor: pointer; border: 1px solid #e2e8f0; }
+        .calendar-date.active { background: var(--primary) !important; color: white !important; }
+        .calendar-date.has-data { background: var(--success); color: white; }
+        .calendar-date.today { border: 2.5px solid var(--primary); }
+        .calendar-date.other-month { color: #cbd5e1; cursor: default; border: none; }
+
+        /* Dashboard Widgets */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+        @media (min-width: 640px) { .dashboard-grid { grid-template-columns: repeat(4, 1fr); } }
+        .widget { background: white; padding: 12px; border-radius: 12px; border: 2px solid #cbd5e1; display: flex; flex-direction: column; }
+        .widget-label { font-size: 10px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px; }
+        .widget-value { font-size: 18px; font-weight: 900; }
+        .widget-net { grid-column: 1 / -1; background: var(--primary-dark); color: white; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-lg); }
+
+        /* Tables */
+        .table-container { overflow-x: auto; border-radius: 8px; border: 1px solid #cbd5e1; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th { background: #e2e8f0; padding: 12px; text-align: left; font-size: 11px; font-weight: 900; border-bottom: 3px solid #94a3b8; }
+        td { padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 13px; font-weight: 700; }
+        .friday-row { background-color: #fee2e2; }
+        .count-badge { background: #e2e8f0; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 900; border: 1px solid #94a3b8; }
+
+        /* Project Cards */
+        .project-card { border-left: 10px solid var(--primary); transition: 0.2s; position: relative; }
+        .project-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+        .project-meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #cbd5e1; margin-top: 15px; }
+        .project-stat-item { display: flex; flex-direction: column; }
+        .project-stat-label { font-size: 10px; font-weight: 900; color: var(--text-muted); }
+        .project-stat-value { font-size: 16px; font-weight: 900; }
+        .project-remarks-box { margin-top: 10px; padding: 10px; background: #fffbeb; border-radius: 8px; border: 1px solid #fef3c7; font-size: 12px; font-style: italic; color: #92400e; font-weight: 600; }
+
+        /* Action Buttons */
+        .action-btn { background: none; border: none; cursor: pointer; font-size: 14px; padding: 5px; border-radius: 4px; transition: 0.2s; font-weight: bold; }
+        .action-btn-edit { color: var(--primary); }
+        .action-btn-delete { color: var(--danger); }
+
+        /* Modal Styles */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 10000; }
+        .modal-content { background: white; width: 90%; max-width: 700px; max-height: 80vh; border-radius: 16px; overflow-y: auto; position: relative; padding: 25px; box-shadow: var(--shadow-lg); border: 3px solid var(--primary); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 20px; }
+        .modal-title { font-size: 20px; font-weight: 800; color: var(--primary); }
+        .modal-close { cursor: pointer; font-size: 24px; font-weight: 800; color: var(--danger); }
+
+        #message-box { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #0f172a; color: white; padding: 10px 25px; border-radius: 30px; font-size: 14px; font-weight: 800; display: none; z-index: 20000; border: 2px solid var(--primary); }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Khata Manager</h1>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-outline" onclick="exportData()">Backup</button>
+                <button class="btn-outline" onclick="document.getElementById('import-file').click()">Restore</button>
+                <input type="file" id="import-file" class="hidden" onchange="importData(event)" accept=".json">
+                <button class="btn-outline" style="border-color: var(--danger); color: var(--danger);" onclick="resetAllData()">Reset All</button>
+            </div>
+        </header>
+
+        <div class="tabs">
+            <button id="tab-thikka" class="tab-btn active" onclick="switchTab('thikka')">Thikka Labor</button>
+            <button id="tab-malik" class="tab-btn" onclick="switchTab('malik')">Malik Makan</button>
+            <button id="tab-ledger" class="tab-btn" onclick="switchTab('ledger')">Ledger (Payments)</button>
+            <button id="tab-projects" class="tab-btn" onclick="switchTab('projects')">Projects (Contract)</button>
+        </div>
+
+        <!-- Attendance Layout -->
+        <div id="attendance-layout" class="main-layout">
+            <div class="sidebar">
+                <div class="card calendar-card">
+                    <div class="calendar-header">
+                        <button class="btn-outline" onclick="prevMonth()">◀</button>
+                        <h3 id="calendar-month-year">Month Year</h3>
+                        <button class="btn-outline" onclick="nextMonth()">▶</button>
+                    </div>
+                    <div id="calendar-body-header" class="calendar-grid">
+                        <div class="day-label">S</div><div class="day-label">M</div><div class="day-label">T</div>
+                        <div class="day-label">W</div><div class="day-label">T</div><div class="day-label">F</div>
+                        <div class="day-label">S</div>
+                    </div>
+                    <div id="calendar-body" class="calendar-grid"></div>
+                </div>
+                <div class="card" style="border-top: 6px solid var(--primary);">
+                    <div class="form-title">
+                        <span id="form-mode-title">Attendance</span>
+                        <span id="day-display" class="count-badge" style="background:var(--primary-light); color:var(--primary)">Date</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="entry-date" onchange="handleDateChange()">
+                    </div>
+                    <div class="form-group"><label>Mistry Count</label><input type="number" id="mistry-count" step="0.5" placeholder="Value likhen..."></div>
+                    <div class="form-group"><label>Mazdor Count</label><input type="number" id="mazdor-count" step="0.5" placeholder="Value likhen..."></div>
+                    <button class="btn btn-primary" onclick="saveEntry()">Save Attendance</button>
+                </div>
+            </div>
+            <div class="content">
+                <div class="dashboard-grid">
+                    <div class="widget"><span class="widget-label">Mistry</span><div id="stat-count-mistry" class="widget-value">0</div></div>
+                    <div class="widget"><span class="widget-label">Mazdor</span><div id="stat-count-mazdor" class="widget-value">0</div></div>
+                    <div class="widget"><span class="widget-label">Gross</span><div id="stat-gross" class="widget-value" style="color:var(--primary)">0</div></div>
+                    <div class="widget"><span class="widget-label">Advance</span><div id="stat-adv-total" class="widget-value" style="color:var(--danger)">0</div></div>
+                    <div class="widget widget-net">
+                        <div>
+                            <span class="widget-label" style="color:#cbd5e1">Total Net Payable</span>
+                            <div id="stat-net" class="widget-value" style="font-size:24px">0</div>
+                        </div>
+                        <button id="btn-pay-labor" class="btn btn-pay-net" onclick="payWeeklyTotal()">✅ Labor Paid</button>
+                    </div>
+                </div>
+                <div class="card" style="border-top: 5px solid var(--warning);">
+                    <h2 style="font-size:15px; font-weight:900; margin-bottom:10px">Add Worker Advance</h2>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr auto; gap:10px; align-items:flex-end">
+                        <div class="form-group" style="margin:0"><label>Name</label><input type="text" id="adv-name" placeholder="Name"></div>
+                        <div class="form-group" style="margin:0"><label>Amount</label><input type="number" id="adv-amount" placeholder="Rs."></div>
+                        <button class="btn btn-primary" style="height:42px; width:70px" onclick="saveAdvance()">Add</button>
+                    </div>
+                    <div id="advances-list" style="margin-top:15px"></div>
+                </div>
+                <div class="card table-card">
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Date</th><th>Mistry</th><th>Mazdor</th><th>Total</th><th></th></tr></thead>
+                            <tbody id="history-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ledger View -->
+        <div id="ledger-layout" class="main-layout hidden full-width">
+            <div class="sub-tabs">
+                <button id="ledger-sub-thikka" class="sub-tab-btn active" onclick="switchLedgerView('thikka')">Thikka Ledger</button>
+                <button id="ledger-sub-malik" class="sub-tab-btn" onclick="switchLedgerView('malik')">Malik Ledger</button>
+            </div>
+            
+            <button class="btn btn-toggle-form" style="background:var(--primary); margin-bottom:20px" onclick="toggleLedgerForm()">📝 + Add Manual Payment Record</button>
+            
+            <div id="ledger-form-card" class="card hidden" style="border:3px solid var(--primary)">
+                <div class="form-title"><span>Add Payment Record (<span id="ledger-form-identity">Thikka</span>)</span></div>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; align-items:flex-end">
+                    <div class="form-group" style="margin:0"><label>Date</label><input type="date" id="ledger-manual-date"></div>
+                    <div class="form-group" style="margin:0"><label>Amount Paid</label><input type="number" id="ledger-manual-amount" placeholder="0.00"></div>
+                    <div class="form-group" style="margin:0;"><label>Remarks</label>
+                        <select id="ledger-remarks-select" onchange="toggleCustomRemark()">
+                            <option value="Jumy-raat Hisab (جمعرات حساب)">جمعرات حساب (Jumy-raat Hisab)</option>
+                            <option value="Advance (ایڈوانس)">ایڈوانس (Advance)</option>
+                            <option value="Weekly Payment">Haftawar Payment</option>
+                            <option value="Other">Other (Custom Likhen)</option>
+                        </select>
+                        <input type="text" id="ledger-manual-remarks" class="hidden" style="margin-top:5px" placeholder="Detail likhen...">
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top:15px" onclick="saveManualLedgerEntry()">Save to Ledger</button>
+            </div>
+
+            <div class="widget" style="background:#1e293b; color:white; padding:20px; margin-bottom:20px">
+                <span class="widget-label" style="color:#cbd5e1">Kul Payment Tracking (<span id="ledger-stat-identity">Thikka</span>)</span>
+                <div id="ledger-total-paid" class="widget-value" style="font-size:35px">Rs. 0</div>
+            </div>
+
+            <div class="card table-card">
+                <div style="padding: 20px; border-bottom: 3px solid #cbd5e1; background: #f8fafc;">
+                    <h2 style="font-size: 16px; font-weight: 900;">Payment History Records (<span id="ledger-table-identity">Thikka</span>)</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Description / Remarks</th>
+                                <th>Amount Paid</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ledger-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Projects View -->
+        <div id="projects-layout" class="main-layout hidden full-width">
+            <button id="add-project-btn" class="btn btn-success" style="margin-bottom:20px; border:none;" onclick="toggleProjectForm()">🏗️ + Start New Project (Plumbing, Tile, etc.)</button>
+            <div id="project-form-card" class="card hidden" style="border:3px solid var(--success)">
+                <div class="form-title"><span id="project-form-header">Naya Project Detail</span></div>
+                <input type="hidden" id="edit-project-id" value="">
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:15px;">
+                    <div class="form-group" style="margin:0"><label>Project Name</label><input type="text" id="project-name" placeholder="Plumbing, Tile, etc..."></div>
+                    <div class="form-group" style="margin:0"><label>Contractor Name</label><input type="text" id="project-contractor" placeholder="Name..."></div>
+                    <div class="form-group" style="margin:0"><label>Total Agreed Amount</label><input type="number" id="project-total-amount" placeholder="0.00"></div>
+                    <div class="form-group" style="margin:0;"><label>Remarks</label><textarea id="project-remarks" placeholder="Detail..." style="height: 45px; resize: none;"></textarea></div>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button class="btn btn-success" style="border:none;" onclick="saveNewProject()">Project Save Karein</button>
+                    <button id="project-cancel-btn" class="btn btn-outline hidden" onclick="cancelProjectEdit()">Cancel Edit</button>
+                </div>
+            </div>
+            <div id="projects-list-container"></div>
+        </div>
+    </div>
+
+    <!-- Payment History Modal -->
+    <div id="payment-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-project-name" class="modal-title">Project History</h2>
+                <span class="modal-close" onclick="closePaymentModal()">&times;</span>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Remarks</th>
+                            <th>Amount</th>
+                            <th style="text-align:right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modal-payment-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="message-box">Saved</div>
+
+    <script>
+        let currentMode = 'thikka', activeCategory = 'thikka', ledgerViewCategory = 'thikka';
+        
+        // Use v15 for the latest fixes
+        let data = JSON.parse(localStorage.getItem('khata_pro_v15')) || { 
+            thikka: { entries: [], advances: [], manualEntries: [] }, 
+            malik: { entries: [], advances: [], manualEntries: [] },
+            projects: [] 
+        };
+        
+        // Help function to get correct YYYY-MM-DD local string
+        function getLocalDateStr(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        let calendarDate = new Date();
+        let selectedDateStr = getLocalDateStr(new Date()); 
+        let currentWeeklyNet = 0, currentWeeklyGross = 0;
+        const rates = { thikka: { mistry: 1700, mazdor: 1000 }, malik: { mistry: 1700, mazdor: 900 } };
+
+        window.onload = () => {
+            const dateInput = document.getElementById('entry-date');
+            const ledgerDateInput = document.getElementById('ledger-manual-date');
+            if(dateInput) dateInput.value = selectedDateStr;
+            if(ledgerDateInput) ledgerDateInput.value = selectedDateStr;
+            handleDateChange();
+        };
+
+        function toggleLedgerForm() { 
+            const el = document.getElementById('ledger-form-card');
+            if(el) el.classList.toggle('hidden'); 
+        }
+        function toggleProjectForm() { 
+            const el = document.getElementById('project-form-card');
+            if(el) el.classList.toggle('hidden'); 
+        }
+        function toggleCustomRemark() {
+            const s = document.getElementById('ledger-remarks-select'), c = document.getElementById('ledger-manual-remarks');
+            if(s && c) {
+                if(s.value==='Other') c.classList.remove('hidden'); else { c.classList.add('hidden'); c.value=''; }
+            }
+        }
+
+        function handleDateChange() {
+            const dateInput = document.getElementById('entry-date');
+            if(dateInput) {
+                selectedDateStr = dateInput.value;
+                const d = new Date(selectedDateStr + "T12:00:00"); // Avoid timezone shift
+                const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+                const dayDisplay = document.getElementById('day-display');
+                if(dayDisplay) dayDisplay.innerText = days[d.getDay()];
+            }
+            renderCalendar(); renderApp();
+        }
+
+        function switchTab(mode) {
+            currentMode = mode;
+            ['tab-thikka','tab-malik','tab-ledger','tab-projects'].forEach(t => {
+                const el = document.getElementById(t);
+                if(el) el.classList.toggle('active', t==='tab-'+mode);
+            });
+            ['attendance-layout','ledger-layout','projects-layout'].forEach(l => {
+                const el = document.getElementById(l);
+                if(el) el.classList.add('hidden');
+            });
+
+            if(mode==='ledger') { 
+                const el = document.getElementById('ledger-layout');
+                if(el) el.classList.remove('hidden'); 
+                renderLedger(); 
+            }
+            else if(mode==='projects') { 
+                const el = document.getElementById('projects-layout');
+                if(el) el.classList.remove('hidden'); 
+                renderProjects(); 
+            }
+            else {
+                activeCategory = mode; 
+                const al = document.getElementById('attendance-layout');
+                if(al) al.classList.remove('hidden');
+                const ft = document.getElementById('form-mode-title');
+                if(ft) ft.innerText = (mode==='thikka'?'Thikka':'Malik Makan') + " Attendance";
+                renderCalendar(); renderApp();
+            }
+        }
+
+        function switchLedgerView(cat) {
+            ledgerViewCategory = cat;
+            const lth = document.getElementById('ledger-sub-thikka');
+            const lml = document.getElementById('ledger-sub-malik');
+            if(lth) lth.classList.toggle('active', cat==='thikka');
+            if(lml) lml.classList.toggle('active', cat==='malik');
+            
+            const lbl = (cat==='thikka'?'Thikka':'Malik Makan');
+            ['ledger-form-identity','ledger-stat-identity','ledger-table-identity'].forEach(id => {
+                const el = document.getElementById(id); if(el) el.innerText = lbl;
+            });
+            renderLedger();
+        }
+
+        function renderCalendar() {
+            if(currentMode==='ledger'||currentMode==='projects') return;
+            const y = calendarDate.getFullYear(), m = calendarDate.getMonth();
+            const cmy = document.getElementById('calendar-month-year');
+            if(cmy) cmy.innerText = new Intl.DateTimeFormat('en-US',{month:'short', year:'numeric'}).format(calendarDate);
+            
+            const first = new Date(y, m, 1).getDay(), daysCount = new Date(y, m+1, 0).getDate(), body = document.getElementById('calendar-body');
+            if(!body) return;
+            body.innerHTML = '';
+            
+            for(let i=0; i<first; i++) body.appendChild(Object.assign(document.createElement('div'), {className:'calendar-date other-month'}));
+            
+            const entryDates = data[activeCategory].entries.map(e => e.date);
+            const todayStr = getLocalDateStr(new Date());
+
+            for(let d=1; d<=daysCount; d++) {
+                const dateObj = new Date(y, m, d);
+                const ds = getLocalDateStr(dateObj); 
+                const el = document.createElement('div');
+                el.className = 'calendar-date'; el.innerText = d;
+                
+                if(ds === todayStr) el.classList.add('today');
+                if(ds === selectedDateStr) el.classList.add('active');
+                if(entryDates.includes(ds)) el.classList.add('has-data');
+                
+                el.onclick = () => { 
+                    selectedDateStr = ds; 
+                    const di = document.getElementById('entry-date');
+                    if(di) di.value = ds; 
+                    handleDateChange(); 
+                };
+                body.appendChild(el);
+            }
+        }
+
+        function prevMonth() { calendarDate.setMonth(calendarDate.getMonth()-1); renderCalendar(); }
+        function nextMonth() { calendarDate.setMonth(calendarDate.getMonth()+1); renderCalendar(); }
+
+        function saveEntry() {
+            const mci = document.getElementById('mistry-count'), mzci = document.getElementById('mazdor-count');
+            const m = parseFloat(mci ? mci.value : 0)||0, z = parseFloat(mzci ? mzci.value : 0)||0;
+            const entry = { id: Date.now(), date: selectedDateStr, mistryCount: m, mazdorCount: z, total: (m*rates[activeCategory].mistry)+(z*rates[activeCategory].mazdor), settled: false };
+            const idx = data[activeCategory].entries.findIndex(e => e.date === selectedDateStr);
+            if(idx>-1) data[activeCategory].entries[idx] = entry; else data[activeCategory].entries.push(entry);
+            saveToStorage(); renderCalendar(); renderApp();
+            // Reset to blank after save
+            if(mci) mci.value = ''; if(mzci) mzci.value = '';
+            showMessage("Attendance Saved");
+        }
+
+        function saveAdvance() {
+            const an = document.getElementById('adv-name'), aa = document.getElementById('adv-amount');
+            const n = an ? an.value.trim() : "", a = parseInt(aa ? aa.value : 0)||0;
+            if(!n || a<=0) return;
+            data[activeCategory].advances.push({ id: Date.now(), date: selectedDateStr, name: n, amount: a, settled: false });
+            saveToStorage(); if(an) an.value = ''; if(aa) aa.value = '';
+            renderApp(); showMessage("Advance Added");
+        }
+
+        // Yeh function ab week ki limit ke bajaye saare unsettled amount ko settle karega
+        function payWeeklyTotal() {
+            if(currentWeeklyNet<=0) return showMessage("Zero balance.");
+            if(!confirm(`Rs. ${currentWeeklyNet.toLocaleString()} paid record save karein?`)) return;
+            const td = getLocalDateStr(new Date());
+            
+            // Ledger mein entry daal do
+            data[activeCategory].manualEntries.push({ id: Date.now(), date: td, amount: currentWeeklyNet, remarks: "Jumy-raat / Settlement", type: 'debit' });
+            
+            // Sabhi unpaid (settled: false) entries ko settled: true kar do
+            data[activeCategory].entries.forEach(e => { if(!e.settled) e.settled = true; });
+            data[activeCategory].advances.forEach(a => { if(!a.settled) a.settled = true; });
+            
+            saveToStorage(); renderApp(); showMessage("Settle ho gaya!");
+        }
+
+        function saveManualLedgerEntry() {
+            const md = document.getElementById('ledger-manual-date'), ma = document.getElementById('ledger-manual-amount');
+            const rs = document.getElementById('ledger-remarks-select'), mr = document.getElementById('ledger-manual-remarks');
+            const d = md ? md.value : "", a = parseFloat(ma ? ma.value : 0)||0;
+            const s = rs ? rs.value : "", c = mr ? mr.value.trim() : "";
+            if(!d || a<=0) return;
+            data[ledgerViewCategory].manualEntries.push({ id: Date.now(), date: d, amount: a, remarks: (s==='Other'?(c||"Payment"):s), type: 'debit' });
+            saveToStorage(); toggleLedgerForm(); renderLedger();
+        }
+
+        function renderLedger() {
+            const body = document.getElementById('ledger-body'); if(!body) return;
+            body.innerHTML = '';
+            let list = [], total = 0;
+            data[ledgerViewCategory].manualEntries.forEach(m => list.push({ ...m, origin: 'manual' }));
+            data[ledgerViewCategory].advances.forEach(a => list.push({ ...a, remarks: "Worker: "+a.name, origin: 'advances' }));
+            list.sort((a,b) => b.date.localeCompare(a.date));
+            list.forEach(item => {
+                total += item.amount;
+                body.innerHTML += `<tr><td>${item.date}</td><td>Paid</td><td>${item.remarks}</td><td style="color:var(--danger)">Rs. ${item.amount.toLocaleString()}</td>
+                <td style="text-align:right"><button class="btn-outline" style="color:var(--danger)" onclick="deleteLedgerItem('${item.origin}', ${item.id})">&times;</button></td></tr>`;
+            });
+            const ltp = document.getElementById('ledger-total-paid');
+            if(ltp) ltp.innerText = `Rs. ${total.toLocaleString()}`;
+        }
+
+        function deleteLedgerItem(o, id) {
+            if(!confirm("Delete?")) return;
+            if(o==='manual') data[ledgerViewCategory].manualEntries = data[ledgerViewCategory].manualEntries.filter(m => m.id !== id);
+            else data[ledgerViewCategory].advances = data[ledgerViewCategory].advances.filter(a => a.id !== id);
+            saveToStorage(); renderLedger();
+        }
+
+        // Project Functions
+        function saveNewProject() {
+            const pn = document.getElementById('project-name'), pc = document.getElementById('project-contractor'), pta = document.getElementById('project-total-amount'), pr = document.getElementById('project-remarks'), epid = document.getElementById('edit-project-id');
+            const n = pn ? pn.value.trim() : "", c = pc ? pc.value.trim() : "", t = parseFloat(pta ? pta.value : 0)||0, r = pr ? pr.value.trim() : "", editId = epid ? epid.value : "";
+            if(!n || !c) return showMessage("Check Details");
+            if(editId) {
+                const p = data.projects.find(x => x.id == editId);
+                if(p) Object.assign(p, { name: n, contractor: c, totalAmount: t, remarks: r });
+                cancelProjectEdit();
+            } else {
+                data.projects.push({ id: Date.now(), name: n, contractor: c, totalAmount: t, remarks: r, payments: [] });
+                toggleProjectForm();
+            }
+            saveToStorage(); renderProjects(); showMessage("Saved");
+        }
+
+        function renderProjects() {
+            const con = document.getElementById('projects-list-container'); if(!con) return;
+            con.innerHTML = '';
+            if(!data.projects.length) { con.innerHTML = '<div class="card" style="text-align:center; padding:40px; color:#999">No Projects.</div>'; return; }
+            data.projects.forEach(p => {
+                const paid = p.payments.reduce((s, pay) => s + pay.amount, 0), bal = p.totalAmount - paid;
+                con.innerHTML += `<div class="card project-card">
+                    <div style="display:flex; justify-content:space-between">
+                        <div><h2 style="font-size:20px; font-weight:900; color:var(--primary)">${p.name}</h2><p>Contractor: <b>${p.contractor}</b></p></div>
+                        <div style="display:flex; gap:8px">
+                            <button class="btn-outline" style="background:var(--primary); color:white; border:none" onclick="addProjectPayment(${p.id})">+ Pay Cash</button>
+                            <button class="btn-outline" style="background:var(--success); color:white; border:none" onclick="showPaymentModal(${p.id})">Check History</button>
+                            <button class="btn-outline" onclick="editProject(${p.id})">Edit</button>
+                            <button class="btn-outline" style="color:var(--danger); border-color:var(--danger)" onclick="deleteProject(${p.id})">Delete</button>
+                        </div>
+                    </div>
+                    ${p.remarks ? `<div class="project-remarks-box"><b>Remarks:</b> ${p.remarks}</div>` : ''}
+                    <div class="project-meta-grid">
+                        <div class="project-stat-item"><span class="project-stat-label">Total Agreed</span><span class="project-stat-value">Rs. ${p.totalAmount.toLocaleString()}</span></div>
+                        <div class="project-stat-item"><span class="project-stat-label" style="color:var(--danger)">Total Paid</span><span class="project-stat-value" style="color:var(--danger)">Rs. ${paid.toLocaleString()}</span></div>
+                        <div class="project-stat-item" style="grid-column: span 2; border-top: 1px solid #ddd; padding-top:10px;"><span class="project-stat-label" style="color:var(--success)">Balance Due</span><span class="project-stat-value" style="color:var(--success); font-size:20px">Rs. ${bal.toLocaleString()}</span></div>
+                    </div>
+                </div>`;
+            });
+        }
+
+        // Modal Functions
+        function showPaymentModal(projectId) {
+            const p = data.projects.find(x => x.id === projectId);
+            if(!p) return;
+            const mn = document.getElementById('modal-project-name'); if(mn) mn.innerText = p.name + " - History";
+            const tbody = document.getElementById('modal-payment-body'); if(!tbody) return;
+            tbody.innerHTML = '';
+            if(!p.payments.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px">No payments.</td></tr>'; }
+            p.payments.forEach(pay => {
+                tbody.innerHTML += `<tr>
+                    <td>${pay.date}</td>
+                    <td>${pay.remarks}</td>
+                    <td style="color:var(--danger); font-weight:800">Rs. ${pay.amount.toLocaleString()}</td>
+                    <td style="text-align:right">
+                        <button class="action-btn action-btn-edit" onclick="editProjectPayment(${p.id}, ${pay.id})">✎</button>
+                        <button class="action-btn action-btn-delete" onclick="deleteProjectPayment(${p.id}, ${pay.id})">🗑</button>
+                    </td>
+                </tr>`;
+            });
+            const pm = document.getElementById('payment-modal'); if(pm) pm.style.display = 'flex';
+        }
+
+        function closePaymentModal() { const pm = document.getElementById('payment-modal'); if(pm) pm.style.display = 'none'; }
+
+        function addProjectPayment(id) {
+            const a = parseFloat(prompt("Amount:"));
+            const r = prompt("Remarks:") || "Payment";
+            if(!a || a<=0) return;
+            const p = data.projects.find(x => x.id === id);
+            if(p) { p.payments.push({ id: Date.now(), date: getLocalDateStr(new Date()), amount: a, remarks: r }); saveToStorage(); renderProjects(); showMessage("Paid!"); }
+        }
+
+        function editProjectPayment(projectId, paymentId) {
+            const p = data.projects.find(x => x.id === projectId);
+            const pay = p.payments.find(x => x.id === paymentId);
+            const na = parseFloat(prompt("New Amount:", pay.amount)), nr = prompt("New Remarks:", pay.remarks);
+            if(!isNaN(na)) { pay.amount = na; pay.remarks = nr || "Payment"; saveToStorage(); showPaymentModal(projectId); renderProjects(); }
+        }
+
+        function deleteProjectPayment(projectId, paymentId) {
+            if(confirm("Confirmation 1: Delete record?")) {
+                if(confirm("Confirmation 2 (Final): Are you sure?")) {
+                    const p = data.projects.find(x => x.id === projectId);
+                    p.payments = p.payments.filter(y => y.id !== paymentId);
+                    saveToStorage(); showPaymentModal(projectId); renderProjects(); showMessage("Deleted");
+                }
+            }
+        }
+
+        function editProject(id) {
+            const p = data.projects.find(x => x.id === id);
+            const epi = document.getElementById('edit-project-id'); if(epi) epi.value = p.id;
+            const pn = document.getElementById('project-name'); if(pn) pn.value = p.name;
+            const pc = document.getElementById('project-contractor'); if(pc) pc.value = p.contractor;
+            const pta = document.getElementById('project-total-amount'); if(pta) pta.value = p.totalAmount;
+            const pr = document.getElementById('project-remarks'); if(pr) pr.value = p.remarks || "";
+            const pfh = document.getElementById('project-form-header'); if(pfh) pfh.innerText = "Edit Project";
+            const pfc = document.getElementById('project-form-card'); if(pfc) pfc.classList.remove('hidden');
+            const pcb = document.getElementById('project-cancel-btn'); if(pcb) pcb.classList.remove('hidden');
+            window.scrollTo(0,0);
+        }
+
+        function cancelProjectEdit() {
+            ['edit-project-id','project-name','project-contractor','project-total-amount','project-remarks'].forEach(id => {
+                const el = document.getElementById(id); if(el) el.value = '';
+            });
+            const pfh = document.getElementById('project-form-header'); if(pfh) pfh.innerText = "Naya Project Detail";
+            const pfc = document.getElementById('project-form-card'); if(pfc) pfc.classList.add('hidden');
+            const pcb = document.getElementById('project-cancel-btn'); if(pcb) pcb.classList.add('hidden');
+        }
+
+        function deleteProject(id) { if(confirm("Delete Project?")) { data.projects = data.projects.filter(x => x.id !== id); saveToStorage(); renderProjects(); } }
+
+        function saveToStorage() { localStorage.setItem('khata_pro_v15', JSON.stringify(data)); }
+
+        // Ab renderApp mein week ki date filter hata diya gaya hai
+        // Jab tak entry "settled: false" hai, tab tak wo show hoti rahegi
+        function renderApp() {
+            if(currentMode==='ledger'||currentMode==='projects') return;
+            const tbody = document.getElementById('history-body'), con = document.getElementById('advances-list');
+            if(!tbody || !con) return;
+            tbody.innerHTML = ''; con.innerHTML = '';
+            let g = 0, a = 0, mi = 0, ma = 0;
+            
+            data[activeCategory].entries.forEach(e => {
+                if(!e.settled) {
+                    g += e.total; 
+                    mi += Number(e.mistryCount); 
+                    ma += Number(e.mazdorCount);
+                    tbody.innerHTML += `<tr class="${new Date(e.date).getDay()===5?'friday-row':''}"><td>${e.date}</td><td><span class="count-badge">${e.mistryCount}</span></td><td><span class="count-badge">${e.mazdorCount}</span></td><td>Rs. ${e.total.toLocaleString()}</td>
+                    <td><button class="btn-outline" onclick="deleteEntry(${e.id})">&times;</button></td></tr>`;
+                }
+            });
+            
+            data[activeCategory].advances.forEach(ad => {
+                if(!ad.settled) {
+                    a += ad.amount;
+                    con.innerHTML += `<div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #eee"><span><b>${ad.name}</b> (${ad.date})</span><span>Rs. ${ad.amount.toLocaleString()} <button onclick="deleteAdv(${ad.id})" style="border:none; color:red; background:none; cursor:pointer">&times;</button></span></div>`;
+                }
+            });
+            
+            const smi = document.getElementById('stat-count-mistry'), sma = document.getElementById('stat-count-mazdor'), sg = document.getElementById('stat-gross'), sa = document.getElementById('stat-adv-total'), sn = document.getElementById('stat-net');
+            if(smi) smi.innerText = mi; if(sma) sma.innerText = ma; if(sg) sg.innerText = "Rs. "+g.toLocaleString(); if(sa) sa.innerText = "Rs. "+a.toLocaleString();
+            currentWeeklyNet = g - a; if(sn) sn.innerText = "Rs. "+currentWeeklyNet.toLocaleString();
+        }
+
+        function deleteEntry(id) { if(confirm("Delete?")) { data[activeCategory].entries = data[activeCategory].entries.filter(e => e.id !== id); saveToStorage(); renderCalendar(); renderApp(); } }
+        function deleteAdv(id) { if(confirm("Delete?")) { data[activeCategory].advances = data[activeCategory].advances.filter(a => a.id !== id); saveToStorage(); renderApp(); } }
+
+        function resetAllData() {
+            if(prompt("Reset Password:")==="Abc@12345") {
+                if(confirm("Format All Data?")) {
+                    data = { thikka: { entries: [], advances: [], manualEntries: [] }, malik: { entries: [], advances: [], manualEntries: [] }, projects: [] };
+                    saveToStorage(); switchTab('thikka'); showMessage("Reset Successful");
+                }
+            } else showMessage("Wrong Password");
+        }
+
+        function showMessage(t) { const b = document.getElementById('message-box'); if(b) { b.innerText = t; b.style.display = 'block'; setTimeout(() => b.style.display = 'none', 2000); } }
+        function exportData() { const blob = new Blob([JSON.stringify(data)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `khata_backup_${getLocalDateStr(new Date())}.json`; a.click(); }
+        function importData(ev) {
+            const f = ev.target.files[0]; if(!f) return;
+            const r = new FileReader(); r.onload = (e) => {
+                try { const imp = JSON.parse(e.target.result); if(confirm("Restore data?")) { data = imp; saveToStorage(); switchTab('thikka'); showMessage("Restored!"); } } catch(e) { showMessage("Error!"); }
+            }; r.readAsText(f);
+        }
+    </script>
+</body>
+</html>
